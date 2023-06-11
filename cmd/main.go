@@ -1,17 +1,26 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"log"
-	"net/http"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	app := fiber.New()
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.Redirect("https://ya.ru", http.StatusSeeOther)
-	})
+	if err := initConfig(); err != nil {
+		logrus.Fatalf("errorr initializing config: %s", err.Error())
+	}
 
-	log.Fatal(app.Listen(":8000"))
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err.Error())
+	}
+
+}
+
+func initConfig() error {
+	viper.AddConfigPath("configsd")
+	viper.SetConfigName("config")
+	return viper.ReadInConfig()
 }
